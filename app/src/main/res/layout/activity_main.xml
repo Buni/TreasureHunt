@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.samhattangady.treasurehunt.MainActivity">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/active_hunts_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="horizontal" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/start_hunts_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/active_hunts_recycler_view"
+
+        android:scrollbars="horizontal" />
+
+    <Button
+        android:id="@+id/search_hunt_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/start_hunts_recycler_view"
+
+        android:text="@string/search"
+        android:onClick="startSearchActivity"/>
+
+    <Button
+        android:id="@+id/create_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/search_hunt_button"
+
+        android:text="@string/create"
+        android:onClick="startCreateActivity"/>
+
+</RelativeLayout>
