@@ -16,10 +16,34 @@
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment" />
 
-    <android.support.v7.widget.AppCompatImageView
-        android:id="@+id/image_clue"
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/lat_long"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/map"/>
+
+    <Button
+        android:id="@+id/lat_long_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lat_long"
+        android:text="Get LATLONG"
+        android:onClick="SetLatLong"/>
+
+    <Button
+        android:id="@+id/place_picker_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lat_long_button"
+        android:text="Open Place Picker"
+        android:onClick="openPlacePicker"/>
+
+    <!--<fragment
+        android:id="@+id/place_autocomplete_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+        />-->
+
 
 </RelativeLayout>
