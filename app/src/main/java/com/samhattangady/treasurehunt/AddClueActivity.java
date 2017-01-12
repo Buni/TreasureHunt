@@ -1,22 +1,18 @@
 package com.samhattangady.treasurehunt;
 
 import android.Manifest;
-import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Location;
-import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -34,17 +30,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.squareup.picasso.Picasso;
 
 public class AddClueActivity extends FragmentActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
     private Marker marker;
-    private TextView latlongview;
-    private Location mLastLocation;
     private LatLng mapCenter;
-    private CameraPosition cameraPosition;
+    private boolean markerIsSet;
+    private Button setMarkerButton;
+    private float userZoom;
     private static final int PLACE_PICKER_REQUEST = 1;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -60,7 +55,7 @@ public class AddClueActivity extends FragmentActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         ViewGroup.LayoutParams mapParams = mapFragment.getView().getLayoutParams();
-        mapParams.height = 500;
+        mapParams.height = Resources.getSystem().getDisplayMetrics().heightPixels/3;
         mapFragment.getView().setLayoutParams(mapParams);
         mapFragment.getMapAsync(this);
 
@@ -72,10 +67,12 @@ public class AddClueActivity extends FragmentActivity
                     .build();
         }
 
+        Button searchButton = (Button) findViewById(R.id.search_hunt_button);
+        setMarkerButton = (Button) findViewById(R.id.set_marker_button);
+        setMarkerButton.setText(R.string.set_marker_button);
 
-        latlongview = (TextView) findViewById(R.id.lat_long);
-        latlongview.setText("lat long will appear here.");
-
+        float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+        userZoom = 13;
     }
 
     @Override
@@ -97,35 +94,34 @@ public class AddClueActivity extends FragmentActivity
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
-            latlongview.setText("Location enabled");
         }
 
-        // Center of map is in Bangalore if we cannot find most recent location
+        // Default map center is Bangalore. If location is found, then cam is moved in OnConnected
         mapCenter = new LatLng(12.9716, 77.5946);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null) {
-            mapCenter = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-        }
-        cameraPosition = CameraPosition.builder()
-                .target(mapCenter)
-                .zoom(13)
-                .build();
 
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 1, null);
+        marker = mMap.addMarker(new MarkerOptions().position(mapCenter));
+        markerIsSet = false;
+
+        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                if (!markerIsSet) {
+                    marker.setPosition(mMap.getCameraPosition().target);
+                }
+                userZoom = mMap.getCameraPosition().zoom;
+            }
+        });
     }
 
-    public void SetLatLong(View view) {
-        latlongview.setText(marker.getPosition().toString());
+    public void setMarker(View view) {
+        if (markerIsSet) {
+            setMarkerButton.setText(R.string.set_marker_button);
+            marker.setPosition(mMap.getCameraPosition().target);
+        }
+        else {
+            setMarkerButton.setText(R.string.move_marker_button);
+        }
+        markerIsSet = !markerIsSet;
     }
 
     @Override
@@ -140,15 +136,15 @@ public class AddClueActivity extends FragmentActivity
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null) {
-            mapCenter = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (location != null) {
+            mapCenter = new LatLng(location.getLatitude(), location.getLongitude());
         }
-        cameraPosition = CameraPosition.builder()
-                .target(mapCenter)
-                .zoom(13)
-                .build();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 1, null);
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder()
+                                                                .target(mapCenter)
+                                                                .zoom(userZoom)
+                                                                .build()), 1, null);
+        marker.setPosition(mapCenter);
     }
 
     @Override
@@ -172,18 +168,12 @@ public class AddClueActivity extends FragmentActivity
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place selectedPlace = PlacePicker.getPlace(this, data);
-                if (marker == null) {
-                    marker = mMap.addMarker(new MarkerOptions().position(selectedPlace.getLatLng()));
-                }
                 marker.setPosition(selectedPlace.getLatLng());
-                cameraPosition = CameraPosition.builder()
-                        .target(mapCenter)
-                        .zoom(13)
-                        .build();
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder()
-                                                                         .target(marker.getPosition())
-                                                                         .zoom(13)                                                                         )
-                                                                         .build()), 1, null);
+                                                                        .target(marker.getPosition())
+                                                                        .zoom(userZoom)
+                                                                        .build()), 1, null);
+                setMarkerButton.setText(selectedPlace.getAddress());
             }
         }
     }

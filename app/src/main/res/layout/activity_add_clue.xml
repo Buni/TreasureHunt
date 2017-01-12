@@ -3,10 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.samhattangady.treasurehunt.AddClueActivity">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
@@ -16,34 +12,20 @@
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment" />
 
-    <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/lat_long"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/map"/>
-
     <Button
-        android:id="@+id/lat_long_button"
+        android:id="@+id/set_marker_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/lat_long"
-        android:text="Get LATLONG"
-        android:onClick="SetLatLong"/>
+        android:layout_below="@+id/map"
+        android:onClick="setMarker"/>
 
     <Button
         android:id="@+id/place_picker_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/lat_long_button"
-        android:text="Open Place Picker"
-        android:onClick="openPlacePicker"/>
-
-    <!--<fragment
-        android:id="@+id/place_autocomplete_fragment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
-        />-->
-
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/map"
+        android:text="@string/open_place_picker"
+        android:onClick="openPlacePicker" />
 
 </RelativeLayout>
